@@ -27,6 +27,21 @@ def filter_files_by_extension(dirname):
     return result
 
 
+def preprocess_dotfiles(dirname):
+    dot_files = filter_files_by_extension(dirname)
+    for dot_file in dot_files:
+        with open(dot_file, 'r') as f:
+            lines = f.readlines()
+            if lines[2].startswith('  node [') or lines[2].startswith('  edge [') or lines[2].startswith('  rankdir='):
+                del lines[2]
+            if lines[2].startswith('  node [') or lines[2].startswith('  edge [') or lines[2].startswith('  rankdir='):
+                del lines[2]
+            if lines[2].startswith('  node [') or lines[2].startswith('  edge [') or lines[2].startswith('  rankdir='):
+                del lines[2]
+        with open(dot_file, 'w') as f:
+            f.writelines(lines)
+
+
 def main(dirname):
     dot_files = filter_files_by_extension(dirname)
     graphs = []
@@ -35,13 +50,21 @@ def main(dirname):
         graph = {}
         print('graph_name:', dot_graph.get_name())
         i = 0
-        for node in graph.get_nodes():
+        for node in dot_graph.get_nodes():
             i = i+1
-            if (i == 1 and node.get_name() == 'edge') or (i == 2 and node.get_name() == 'node'):
-                continue
-            print('get_port:',node.get_port())
+            print('get_name:', node)
+            print('get_port:', node.get_port())
             print('to_strings:', node.to_string())
             print('obj_dict:', node.obj_dict)
+
+            for n in node.obj_dict['parent_graph'].get_nodes():
+                print('parent start')
+                print('get_name:', n)
+                print('get_port:', n.get_port())
+                print('to_strings:', n.to_string())
+                print('obj_dict:', n.obj_dict)
+                print(n.obj_dict['parent_graph'].get_name())
+                print('parent end')
 
 
         for edge in dot_graph.get_edges():
@@ -55,4 +78,5 @@ def main(dirname):
 
 
 if __name__ == '__main__':
-    main('./dotfiles')
+    preprocess_dotfiles('./dotfiles')
+#    main('./dotfiles')
