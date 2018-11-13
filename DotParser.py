@@ -27,7 +27,7 @@ def filter_files_by_extension(dirname):
     return result
 
 
-def preprocess_dotfiles(dirname):
+def delete_first_two_lines(dirname):
     dot_files = filter_files_by_extension(dirname)
     for dot_file in dot_files:
         with open(dot_file, 'r') as f:
@@ -42,41 +42,85 @@ def preprocess_dotfiles(dirname):
             f.writelines(lines)
 
 
-def main(dirname):
+def get_lines_number_list(dirname):
     dot_files = filter_files_by_extension(dirname)
-    graphs = []
+    result = {}
     for dot_file in dot_files:
-        dot_graph = pydotplus.graph_from_dot_file(dot_file)
-        graph = {}
-        print('graph_name:', dot_graph.get_name())
-        i = 0
-        for node in dot_graph.get_nodes():
-            i = i+1
-            print('get_name:', node)
-            print('get_port:', node.get_port())
-            print('to_strings:', node.to_string())
-            print('obj_dict:', node.obj_dict)
-
-            for n in node.obj_dict['parent_graph'].get_nodes():
-                print('parent start')
-                print('get_name:', n)
-                print('get_port:', n.get_port())
-                print('to_strings:', n.to_string())
-                print('obj_dict:', n.obj_dict)
-                print(n.obj_dict['parent_graph'].get_name())
-                print('parent end')
+        with open(dot_file, 'r') as f:
+            lines = f.readlines()
+            length = len(lines)
+            result[dot_file] = length
+    result = sorted(result.items(), key=lambda item: item[1], reverse=True)
+    return result
 
 
-        for edge in dot_graph.get_edges():
-            print(i)
-            i += 1
-            print(edge.get_source())
-            print(edge.get_destination())
-            print(edge.to_string())
-            print(edge.obj_dict)
-        print(dot_graph.get_edges())
+def build_graph(dotfile):
+    dot_graph = pydotplus.graph_from_dot_file(dotfile)
+    graph = {}
+    graph['graph_name'] = dot_graph.get_name().strip('"')
+    print('graph_name:', dot_graph.get_name().strip('"'))
+    graph['nodes'] = {}
+    for node in dot_graph.get_nodes():
+        label = node.obj_dict['attributes']['label'].strip('"')
+        if label in graph['nodes'].keys():
+            print('Two same functions exist in one graph.')
+            exit()
+        graph['nodes'][label] = []
+    for edge in dot_graph.get_edges():
+        source_node_list = dot_graph.get_node(edge.get_source())
+        desti_node_list = dot_graph.get_node(edge.get_destination())
+        if len(source_node_list) != 1 or len(desti_node_list) != 1:
+            print('node do not exist or there are more than one node with the same name.')
+            exit()
+        source_label = source_node_list[0].obj_dict['attributes']['label'].strip('"')
+        desti_node_label = desti_node_list[0].obj_dict['attributes']['label'].strip('"')
+        graph['nodes'][source_label].append(desti_node_label)
+    return graph
+
+
+def compare_two_lists(list1, list2):
+    if len(list1) != len(list2):
+        return False
+    else:
+        for item in list1:
+            if item not in list2:
+                return False
+    return True
+
+
+def judge_new_dotfile(dotfile, graphs):
+    dot_graph = pydotplus.graph_from_dot_file(dotfile)
+    node1_label = dot_graph.get_node('Node1')[0].obj_dict['attributes']['label'].strip('"')
+    desti = []
+    for edge in dot_graph.get_edges():
+        if edge.get_source() == 'Node1':
+            desti.append(dot_graph.get_node(edge.get_destination())[0].obj_dict['attributes']['label'].strip('"'))
+    for graph in graphs:
+        if node1_label in graph['nodes'].keys():
+            desti_list = graph['nodes'][node1_label]
+            if compare_two_lists(desti, desti_list) is True:
+                return True
+    return False
+
+
+def main(dirname):
+    dot_files_list = get_lines_number_list(dirname) 
+    graphs = []
+    id = 0
+    for dot_file_item in dot_files_list:
+        dot_file = dot_file_item[0]
+        if judge_new_dotfile(dot_file, graphs) is True:
+            print(dot_file)
+            print('This dot file is included in former graph')
+            continue
+        graph = build_graph(dot_file)
+        print(dot_file)
+        print('building...... ok!')
+        graphs.append(graph)
+    print(graphs)
+
 
 
 if __name__ == '__main__':
-    preprocess_dotfiles('./dotfiles')
-#    main('./dotfiles')
+    delete_first_two_lines('./dot')
+    main('./dot')
