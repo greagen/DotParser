@@ -122,5 +122,5 @@ def main(dirname):
 
 
 if __name__ == '__main__':
-    delete_first_two_lines('./dot')
+    #delete_first_two_lines('./dot')
     main('./dot')
