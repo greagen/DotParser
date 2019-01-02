@@ -1,0 +1,26 @@
+OUTPUT_DIRECTORY = ./doxygen_results
+EXCLUDE_PATTERNS = *.dox, *.doc, *.idl, *.ddl, *.odl, *.java, *.cs, *.d, *.php, *.php4, *.php5, *.inc, *.phtml, *.m, *.M, *.ph, *.pyw
+EXCLUDE_PATTERNS = */test/* \
+                   */build/*
+HAVE_DOT = YES 
+EXTRACT_ALL = YES
+EXTRACT_PRIVATE = YES 
+EXTRACT_STATIC = YES 
+CALL_GRAPH = YES
+GENERATE_LATEX = NO
+DOT_NUM_THREADS = 2
+RECURSIVE = YES
+SOURCE_BROWSER = NO
+GENERATE_LEGEND  = NO
+SHOW_INCLUDE_FILES = NO
+SEARCHENGINE           = NO
+INCLUDE_GRAPH          = NO
+INCLUDED_BY_GRAPH      = NO
+CLASS_GRAPH            = NO
+COLLABORATION_GRAPH    = NO
+DOT_CLEANUP            = NO
+GRAPHICAL_HIERARCHY    = NO
+GROUP_GRAPHS           = NO
+CLASS_DIAGRAMS         = NO
+DIRECTORY_GRAPH        = NO
+DOT_GRAPH_MAX_NODES    = 50

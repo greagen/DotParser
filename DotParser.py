@@ -4,7 +4,7 @@
 # Created Date: Friday, October 19th 2018, 12:21:02 am
 # Author: Greagen
 # -----
-# Last Modified: Mon Dec 31 2018
+# Last Modified: Tue Jan 01 2019
 # Modified By: Greagen
 # -----
 # Copyright (c) 2018 Greagen
@@ -13,6 +13,21 @@
 ###
 import pydotplus
 import os
+import subprocess
+
+
+DOXYGENFILE = '/Users/greagen/Desktop/DotParser/Doxyfile'
+
+def doxygen(dirname):
+    work_path = os.getcwd()
+    os.chdir(dirname)
+    status, output = subprocess.getstatusoutput('cp '+DOXYGENFILE+' .')
+    if status != 0:
+        print('errors! copy DOXYGENFILE to the dir')
+        print('output:\n', output)
+    status, output = subprocess.getstatusoutput('doxygen Doxyfile')
+    os.chdir(work_path)
+    return dirname + '/doxygen_results'
 
 
 def filter_files_by_extension(dirname):
@@ -122,4 +137,5 @@ def main(dirname):
 
 if __name__ == '__main__':
     # delete_first_two_lines('./dot')
-    main('./dot')
+    #main('./dot')
+    print(doxygen('/Users/greagen/Desktop/gimp'))
